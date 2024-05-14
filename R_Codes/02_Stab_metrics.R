@@ -3,28 +3,23 @@
 #organizational levels: present, gaps, and future"
 # Ainhoa Magrach, Bilbao, Bizkaia, Spain, 24-01-2024
 
+#part of the code obtained from Siqueira et al 2023.
+#Understanding temporal variability across trophic levels and 
+#spatial scales in freshwater ecosystems. Ecology, e4219.
+
 library(tibble)
 library(dplyr)
 
 full.data <- as_tibble(
   read.csv("Input_data/full.data.csv", T))
 
-full.data <- as_tibble(
-  summary_df3)
-
-
-# I will use a list from now on as I think it is easier to use lapply 
 
 full.data2 <- split(full.data, f = full.data$System_var, drop = T)
 
 length(full.data2)
-names(full.data2) # here, each element is a unique combination of 
-# a metacommunity and trophic group
+names(full.data2) 
 
-
-
-
-## Arrange it the way Wang's function requires
+## Arrange it in order to use Wang function
 
 full.data2 <- lapply(full.data2, function (x){
   arrange(x, Site_troph, Time_step, Sps)})
@@ -48,11 +43,14 @@ all.array[[1]][,,1] # this is site 1 along time
 #===============================
 ## Run partitioning analysis following Wang et al. 2019  
 
+## Code to partition variability and synchrony (Wang et al. 2019; Ecography)
+source ("R_codes/var_part_wang.R") 
+
 part.W <- lapply(all.array, function (x) var.partition(x))
 part.W
 
 
-
+library(tibble)
 ## Organize results
 resul.all <- do.call(rbind, part.W) %>% 
   as.data.frame() %>% 

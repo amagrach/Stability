@@ -5,10 +5,7 @@ library(tidyverse)
 library(patchwork)
 library(rcartocolor)
 library(emmeans)
-source("R_codes/Split_viol_plot.R")
 
-## Code to partition variability and synchrony (Wang et al. 2019; Ecography)
-source ("R_codes/var_part_wang.R") 
 
 #===============================
 ## Data preparation
@@ -57,8 +54,8 @@ display_carto_all(colorblind_friendly = T)
 # e.g.:
 carto_pal(12, "Safe")
 
-[1] "#88CCEE" "#CC6677" "#DDCC77" "#117733" "#332288" "#AA4499" "#44AA99" "#999933"
-[9] "#882255" "#661100" "#6699CC" "#888888"
+# [1] "#88CCEE" "#CC6677" "#DDCC77" "#117733" "#332288" "#AA4499" "#44AA99" "#999933"
+# [9] "#882255" "#661100" "#6699CC" "#888888"
 
 col_meta_cv <- "#882255"
 col_com_cv <- "#6699CC"
@@ -138,109 +135,6 @@ a2 <- meta.metr.long %>%
 a1/a2
 
 ggsave("figures/Fig5.jpeg", width=27,height=18, units = "cm")
-
-
-
-# Test the differences suggested in the plot
-#cannot really do this with points
-
-df.cvs <- meta.metr.long %>%
-  filter (Partition == "CV_S_L" | Partition == "CV_C_L" | Partition == "CV_C_R") %>%
-  mutate (Partition = factor(Partition, levels = c("CV_S_L", "CV_C_L", "CV_C_R")))
-
-mod.cvs <- lm(log(Value_part) ~ Partition*System_var, data = df.cvs)
-plot(mod.cvs) # They look OK
-anova(mod.cvs) # No interaction
-summary(mod.cvs)
-
-
-
-
-# Packages
-library(tidyverse)
-library(patchwork)
-library(ggdist)
-library(sf)
-library(spData)        # load geographic data
-library(spDataLarge)   # load larger geographic data
-library(tmap)
-library(nlme)
-
-#===============================
-# Site metrics
-site.metr1.supp <- site.metr %>%
-  mutate(New_ecos_tr = paste0(Ecosys, "_", New_tr_g)) %>%
-  mutate(New_ecos_tr = case_when(
-    New_ecos_tr == "Stream_Primary consumer" ~ "Lot_PriCon",
-    New_ecos_tr == "Stream_Secondary consumer" ~ "Lot_SecCon",
-    New_ecos_tr == "Stream_Tertiary consumer" ~ "Lot_TerCon",
-    New_ecos_tr == "Stream_Producer" ~ "Lot_Prod",
-    New_ecos_tr == "Lake_Producer" ~ "Len_Prod",
-    New_ecos_tr == "Lake_Primary consumer" ~ "Len_PriCon")) %>% 
-  mutate(New_ecos_tr = factor(New_ecos_tr,
-                              levels = rev(c("Lot_TerCon", "Lot_SecCon",
-                                             "Lot_PriCon", "Lot_Prod",
-                                             "Len_PriCon", "Len_Prod"))))
-
-
-ps6 <-  site.metr %>% 
-  ggplot(aes(y = System_var, x = log(cv_comm_site), fill = System_var)) +
-  stat_slab(aes(thickness = stat(pdf*n)), scale = 0.3) +
-  stat_dotsinterval(side = "bottom", scale = 0.7, slab_size = NA,
-                    dotsize = 5, alpha = 0.75) +
-  ylab ("") +
-  xlab (expression("Community variability, CV" [italic("C,L")])) +
-  ggtitle ("A") +
-  theme_classic() +
-  theme(axis.text = element_text(size = 17),
-        axis.title = element_text(size = 20),
-        legend.position = "none",
-        plot.title = element_text(vjust = -8, hjust = 0.025, size = 18))
-#
-#
-
-ps7 <- site.metr %>% 
-  ggplot(aes(y = System_var, x = log(mean_cv_species_site), fill = System_var)) +
-  stat_slab(aes(thickness = stat(pdf*n)), scale = 0.5) +
-  stat_dotsinterval(side = "bottom", scale = 0.7, slab_size = NA,
-                    dotsize = 5, alpha = 0.75) +
-  ylab ("") +
-  xlab (expression("Population variability, CV" [italic("S,L")])) +
-  theme_classic() +
-  ggtitle ("B") +
-  theme(legend.position="none") +
-  theme(axis.text.x = element_text(size = 17),
-        axis.title.x = element_text(size = 20),
-        axis.text.y = element_blank(),
-        plot.title = element_text(vjust = -8, hjust = 0.025, size = 18))
-#
-
-ps8 <- site.metr %>% 
-  ggplot(aes(y = System_var, x = log(synchrony_comm_site), fill = System_var)) +
-  stat_slab(aes(thickness = stat(pdf*n)), scale = 0.5) +
-  stat_dotsinterval(side = "bottom", scale = 0.7, slab_size = NA,
-                    dotsize = 5, alpha = 0.75) +
-  ylab ("") +
-  xlab (expression("Population Synchrony " * (psi[italic("S C,L")]))) + 
-  theme_classic() +
-  ggtitle ("C") +
-  theme(legend.position="none") +
-  theme(axis.text.x = element_text(size = 17),
-        axis.title.x = element_text(size = 20),
-        axis.text.y = element_blank(),
-        plot.title = element_text(vjust = -8, hjust = 0.025, size = 18)) 
-#
-ps6+ps7+ps8
-
-
-ggsave("figures/Fig6.jpeg", width=47,height=18, units = "cm")
-
-
-
-
-
-meta.metr 
-site.metr 
 
 
 
